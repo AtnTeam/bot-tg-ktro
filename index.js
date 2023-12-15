@@ -56,6 +56,7 @@ const start = () => {
   bot.on("message", async (msg) => {
     const text = msg.text;
     const chatId = msg.chat.id;
+    const userName = msg.from.first_name;
 
     if (userStates[chatId] === "waitingForId") {
       userStates[chatId] = "waitingForResponse";
@@ -133,6 +134,7 @@ const start = () => {
                     chatId: chatId,
                     keitaroId: userId,
                     status: "found",
+                    userName: userName,
                   };
 
                   await sendToExel(dataToSend);
@@ -158,8 +160,11 @@ const start = () => {
                     chatId: chatId,
                     keitaroId: userId,
                     status: "not found",
+                    userName,
                   };
-
+                  // console.log("====================================");
+                  // console.log(dataToSend);
+                  // console.log("====================================");
                   await sendToExel(dataToSend);
                 } catch (error) {
                   console.error(
@@ -219,7 +224,7 @@ start();
 function sendToExel(dataToSend) {
   // console.log(dataToSend);
   const apiUrl =
-    "https://script.google.com/macros/s/AKfycbwv3MJ3V24AwAC3QfYG68fi7REARvVW9FN4WDC3HsU-B-g3biDrBGrxuJQ38IXGQe4/exec";
+    "https://script.google.com/macros/s/AKfycbwMLbP4XnDAOhhiNhsUm8ZEN4Me80LTdaaKRGK7OggN5CkL2YlR9ip0GRwSIDjx1RvJ/exec";
 
   axios
     .get(apiUrl, {
