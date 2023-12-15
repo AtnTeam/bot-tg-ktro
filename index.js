@@ -20,8 +20,8 @@ const start = () => {
     const chatId = msg.chat.id;
     const userName = msg.from.first_name;
 
-    if (text === "/start" && userStates[chatId] !== "waitingForId") {
-      userStates[chatId] = "idle";
+    if (text === "/start") {
+      userStates[chatId] = "idle"; // Оновити стан користувача на "idle" при команді /start
       const keyboard = {
         inline_keyboard: [
           [
@@ -91,9 +91,9 @@ const start = () => {
             }
           );
 
-          console.log("====================================");
-          console.log(response.data);
-          console.log("====================================");
+          // console.log("====================================");
+          // console.log(response.data);
+          // console.log("====================================");
 
           const userId = text.split("_")[0];
           const filteredData = response.data.rows.filter((row) => {
@@ -143,15 +143,7 @@ const start = () => {
                   );
                 }
               });
-          }
-
-          // else {
-          //   return bot.sendMessage(
-          //     chatId,
-          //     "I don't see your ID in the system yet, integration may take 1 hour. Check if you registered through our link, if not, I won't be able to connect to your account. If you did, while you wait for the integration, make a deposit and place 5 bets in the Aviator game and play 3 other different games, I need this to train my algorithms and fully integrate with your account at Lopobet casino."
-          //   );
-          // }
-          else {
+          } else {
             await bot.sendMessage(chatId, `You have entered your ID: ${text}`);
             await bot
               .sendMessage(
@@ -223,8 +215,9 @@ const start = () => {
 
 start();
 
+// Функція для відправки даних до Google Sheets через Apps Script
 function sendToExel(dataToSend) {
-  console.log(dataToSend);
+  // console.log(dataToSend);
   const apiUrl =
     "https://script.google.com/macros/s/AKfycbwv3MJ3V24AwAC3QfYG68fi7REARvVW9FN4WDC3HsU-B-g3biDrBGrxuJQ38IXGQe4/exec";
 
@@ -234,7 +227,7 @@ function sendToExel(dataToSend) {
       timeout: 30000,
     })
     .then(function (response) {
-      console.log(response.data);
+      // console.log(response.data);
     })
     .catch(function (error) {
       console.error("Произошла ошибка:", error);
