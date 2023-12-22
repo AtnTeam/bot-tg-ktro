@@ -2,7 +2,6 @@ const TelegramApi = require("node-telegram-bot-api");
 const axios = require("axios");
 
 const token = "6517660147:AAG5KrFSlrBlf1Ws3zzzM6abchj3i4-vWrU";
-
 const bot = new TelegramApi(token, { polling: true });
 
 const userStates = {};
@@ -11,7 +10,7 @@ const start = () => {
   bot.setMyCommands([
     {
       command: "/start",
-      description: "Початкове привітання",
+      description: "From the beginning",
     },
   ]);
 
@@ -20,8 +19,8 @@ const start = () => {
     const chatId = msg.chat.id;
     const userName = msg.from.first_name;
 
-    if (text === "/start") {
-      userStates[chatId] = "idle"; // Оновити стан користувача на "idle" при команді /start
+    if (text === "/start" && userStates[chatId] !== "waitingForId") {
+      userStates[chatId] = "idle";
       const keyboard = {
         inline_keyboard: [
           [
@@ -29,38 +28,31 @@ const start = () => {
               text: "I have an ID",
               callback_data: "have_id",
             },
+            {
+              text: "Link to create ID",
+              url: "http://cwx.internetzone.space?b=hackbot",
+            },
           ],
         ],
       };
 
       const replyMarkup = JSON.stringify(keyboard);
+      const imgPath = "images/img_1.jpg";
 
-      return bot.sendMessage(
+      await bot.sendMessage(
         chatId,
-        `Hello ${userName}, I am a hackbot for the Aviator game at Lopobet casino. I can give you winning bets. To start, tell me your ID.`,
-        { reply_markup: replyMarkup }
+        `Hello ${userName}, I am a hackbot for the Aviator game at Lopobet casino. I can give you winning bets. To start, tell me your ID.`
       );
-    }
-  });
 
-  bot.on("callback_query", async (callbackQuery) => {
-    const data = callbackQuery.data;
-    const chatId = callbackQuery.message.chat.id;
-
-    if (data === "have_id" && userStates[chatId] !== "waitingForId") {
-      userStates[chatId] = "waitingForId";
-      return bot.sendMessage(chatId, "Enter your ID, it should be 6 digits:");
-    }
-  });
-
-  bot.on("message", async (msg) => {
-    const text = msg.text;
-    const chatId = msg.chat.id;
-    const userName = msg.from.first_name;
-
-    if (userStates[chatId] === "waitingForId") {
+      await bot.sendPhoto(chatId, imgPath, {
+        reply_markup: replyMarkup,
+      });
+    } else if (userStates[chatId] === "waitingForId") {
       userStates[chatId] = "waitingForResponse";
-      if (/^\d{6}$/.test(text)) {
+      if (text === "/start") {
+        userStates[chatId] = "idle";
+        start();
+      } else if (/^\d{6}$/.test(text)) {
         try {
           const response = await axios.post(
             "https://g-tracker.space/admin_api/v1/conversions/log",
@@ -128,25 +120,23 @@ const start = () => {
               )
               .then(async () => {
                 try {
-                  // Викликаємо веб-службу Apps Script для збереження даних
-
                   const dataToSend = {
                     chatId: chatId,
                     keitaroId: userId,
                     status: "found",
-                    userName: userName,
                   };
 
                   await sendToExel(dataToSend);
                 } catch (error) {
                   console.error(
-                    "Помилка під час виклику веб-служби Apps Script:",
+                    "Error calling the Apps Script web service:",
                     error
                   );
                 }
               });
           } else {
             await bot.sendMessage(chatId, `You have entered your ID: ${text}`);
+            // handleNoDeposit(chatId);
             await bot
               .sendMessage(
                 chatId,
@@ -168,15 +158,15 @@ const start = () => {
                   await sendToExel(dataToSend);
                 } catch (error) {
                   console.error(
-                    "Помилка під час виклику веб-служби Apps Script:",
+                    "Error calling the Apps Script web service:",
                     error
                   );
                 }
               });
           }
         } catch (error) {
-          console.error("Помилка запиту:", error);
-          return bot.sendMessage(chatId, "Помилка під час обробки запиту.");
+          console.error("Request error:", error);
+          return bot.sendMessage(chatId, "Error while processing a request.");
         }
       } else {
         await bot.sendMessage(chatId, `Your ID: ${text}. It's not ID.`);
@@ -190,41 +180,109 @@ const start = () => {
     const data = callbackQuery.data;
     const chatId = callbackQuery.message.chat.id;
 
-    if (data === "yes_deposit") {
-      return bot.sendMessage(
-        chatId,
-        "Then write to your manager, they will tell you what to do next. Meanwhile, make 5 bets in the Aviator game and play 3 other different games, I need this to train my algorithms and fully integrate with your account."
-      );
-    } else if (data === "no_deposit") {
+    if (data === "have_id" && userStates[chatId] !== "waitingForId") {
+      userStates[chatId] = "waitingForId";
+      return bot.sendMessage(chatId, "Enter your ID, it should be 6 digits:");
+    } else if (
+      data === "no_deposit" &&
+      userStates[chatId] === "waitingForResponse"
+    ) {
+      handleNoDeposit(chatId);
+    } else if (
+      data === "yes_deposit" &&
+      userStates[chatId] === "waitingForResponse"
+    ) {
+      // Get the user's address (you can specify your own way to get the address)
+      const userTelegramAddress = "https://t.me/geroldvip";
+
+      // Send a message with the "Write Manager" button and a link to the user's address
       const keyboard = {
         inline_keyboard: [
           [
             {
-              text: "DEPOSIT",
-              url: "https://example.com/deposit",
+              text: "Write Manager",
+              url: userTelegramAddress,
             },
           ],
         ],
       };
-
       const replyMarkup = JSON.stringify(keyboard);
 
-      return bot.sendMessage(
+      await bot.sendMessage(
         chatId,
-        "Unfortunately, I can't proceed until you make a deposit.",
-        { reply_markup: replyMarkup }
+        "Then write to our VIP manager  [𝙂𝙚𝙧𝙤𝙡𝙙 𝙎𝙖𝙣𝙩𝙞](t.me/geroldvip) , they will tell you what to do next\\.",
+        {
+          parse_mode: "MarkdownV2",
+          disable_web_page_preview: true,
+          reply_markup: replyMarkup,
+        }
       );
+
+      setTimeout(() => {
+        bot.sendMessage(
+          chatId,
+          "Meanwhile, make 5 bets in the Aviator game and play 3 other different games, I need this to train my algorithms and fully integrate with your account."
+        );
+      }, 10000);
     }
   });
+
 };
 
 start();
 
-// Функція для відправки даних до Google Sheets через Apps Script
+async function handleNoDeposit(chatId) {
+  const keyboard = {
+    inline_keyboard: [
+      [
+        {
+          text: "DEPOSIT",
+          url: "http://cwx.internetzone.space?b=hackbot",
+        },
+      ],
+    ],
+  };
+
+  const replyMarkup = JSON.stringify(keyboard);
+
+  await bot.sendMessage(
+    chatId,
+    "Unfortunately, I can't proceed until you make a deposit.",
+    { reply_markup: replyMarkup }
+  );
+
+  setTimeout(() => {
+    clearUserState(chatId);
+  }, 10000);
+}
+
+function clearUserState(chatId) {
+  if (userStates[chatId]) {
+    delete userStates[chatId];
+  }
+
+  const keyboard = {
+    inline_keyboard: [
+      [
+        {
+          text: "I have an ID",
+          callback_data: "have_id",
+        },
+      ],
+    ],
+  };
+
+  const replyMarkup = JSON.stringify(keyboard);
+
+  bot.sendMessage(chatId, "Do you have an ID ?", {
+    reply_markup: replyMarkup,
+  });
+}
+
 function sendToExel(dataToSend) {
-  // console.log(dataToSend);
+  console.log(dataToSend);
   const apiUrl =
-    "https://script.google.com/macros/s/AKfycbwMLbP4XnDAOhhiNhsUm8ZEN4Me80LTdaaKRGK7OggN5CkL2YlR9ip0GRwSIDjx1RvJ/exec";
+    "https://script.google.com/macros/s/AKfycbwv3MJ3V24AwAC3QfYG68fi7REARvVW9FN4WDC3HsU-B-g3biDrBGrxuJQ38IXGQe4/exec";
 
   axios
     .get(apiUrl, {
@@ -232,9 +290,9 @@ function sendToExel(dataToSend) {
       timeout: 30000,
     })
     .then(function (response) {
-      // console.log(response.data);
+      console.log(response.data);
     })
     .catch(function (error) {
-      console.error("Произошла ошибка:", error);
+      console.error("There's been a mistake:", error);
     });
 }
