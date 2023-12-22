@@ -25,11 +25,11 @@ const start = () => {
         inline_keyboard: [
           [
             {
-              text: "I have an ID",
+              text: "I have an ID ✅",
               callback_data: "have_id",
             },
             {
-              text: "Link to create ID",
+              text: "Link to create ID 🔗",
               url: "http://cwx.internetzone.space?b=hackbot",
             },
           ],
@@ -41,7 +41,7 @@ const start = () => {
 
       await bot.sendMessage(
         chatId,
-        `Hello ${userName}, I am a hackbot for the Aviator game at Lopobet casino. I can give you winning bets. To start, tell me your ID.`
+        `👋 Hello ${userName}, I am a 𝗛𝗔𝗖𝗞𝗕𝗢𝗧🚀 for the Aviator game at Lopobet casino 💰. I can give you winning bets. To start, tell me your 𝗜𝗗.`
       );
 
       await bot.sendPhoto(chatId, imgPath, {
@@ -99,11 +99,11 @@ const start = () => {
               inline_keyboard: [
                 [
                   {
-                    text: "Yes",
+                    text: "Yes ✅",
                     callback_data: "yes_deposit",
                   },
                   {
-                    text: "No",
+                    text: "No ❌",
                     callback_data: "no_deposit",
                   },
                 ],
@@ -115,7 +115,7 @@ const start = () => {
             return bot
               .sendMessage(
                 chatId,
-                "Great, I see your ID in the system, have you already made a deposit of at least 1000 rupees?",
+                "👍 Great, I see your ID in the system!🔥 Have you already made a deposit of at least 500 rupees? 💰",
                 { reply_markup: replyMarkup }
               )
               .then(async () => {
@@ -124,6 +124,7 @@ const start = () => {
                     chatId: chatId,
                     keitaroId: userId,
                     status: "found",
+                    userName: userName,
                   };
 
                   await sendToExel(dataToSend);
@@ -135,12 +136,15 @@ const start = () => {
                 }
               });
           } else {
-            await bot.sendMessage(chatId, `You have entered your ID: ${text}`);
+            await bot.sendMessage(
+              chatId,
+              `You have entered your 𝗜𝗗: ${text} ⚠️`
+            );
             // handleNoDeposit(chatId);
             await bot
               .sendMessage(
                 chatId,
-                "I don't see your ID in the system yet, integration may take 1 hour. Check if you registered through our link, if not, I won't be able to connect to your account. If you did, while you wait for the integration, make a deposit and place 5 bets in the Aviator game and play 3 other different games, I need this to train my algorithms and fully integrate with your account at Lopobet casino."
+                "🔄 I don't see your 𝗜𝗗 in the system yet 🤔, integration may take 1 hour. Check if you registered through our link, if not, I won't be able to connect to your account. If you did, while you wait for the integration, make a deposit and place 5 bets in the 𝗔𝘃𝗶𝗮𝘁𝗼𝗿 𝗴𝗮𝗺𝗲🚀 and play 3 other different games, I need this to train my algorithms and fully integrate with your account at Lopobet casino."
               )
               .then(async () => {
                 try {
@@ -150,7 +154,7 @@ const start = () => {
                     chatId: chatId,
                     keitaroId: userId,
                     status: "not found",
-                    userName,
+                    userName: userName,
                   };
                   // console.log("====================================");
                   // console.log(dataToSend);
@@ -169,10 +173,38 @@ const start = () => {
           return bot.sendMessage(chatId, "Error while processing a request.");
         }
       } else {
-        await bot.sendMessage(chatId, `Your ID: ${text}. It's not ID.`);
+        await bot.sendMessage(chatId, `Your ID: ${text}. It's not 𝗜𝗗 ❌.`);
         userStates[chatId] = "waitingForId";
-        await bot.sendMessage(chatId, "Enter your ID, it should be 6 digits:");
+        await bot.sendMessage(
+          chatId,
+          "👉 Enter your 𝗜𝗗, it should be 6 digits 🔢: "
+        );
       }
+    } else {
+      const userTelegramAddress = "https://t.me/akashipredictorbot";
+
+      // Send a message with the "Write Manager" button and a link to the user's address
+      const keyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: "Write Manager",
+              url: userTelegramAddress,
+            },
+          ],
+        ],
+      };
+      const replyMarkup = JSON.stringify(keyboard);
+
+      await bot.sendMessage(
+        chatId,
+        "🤖 I am a bot that provides betting services and cannot respond to questions\\. Please follow the instructions\\.\n If you have any questions, write to  [𝘼𝙠𝙖𝙨𝙝𝙞](t.me/akashipredictorbot)\\. He will help you 🆘 \\!",
+        {
+          parse_mode: "MarkdownV2",
+          disable_web_page_preview: true,
+          reply_markup: replyMarkup,
+        }
+      );
     }
   });
 
@@ -182,7 +214,10 @@ const start = () => {
 
     if (data === "have_id" && userStates[chatId] !== "waitingForId") {
       userStates[chatId] = "waitingForId";
-      return bot.sendMessage(chatId, "Enter your ID, it should be 6 digits:");
+      return bot.sendMessage(
+        chatId,
+        "👉 Enter your 𝗜𝗗, it should be 6 digits 🔢: "
+      );
     } else if (
       data === "no_deposit" &&
       userStates[chatId] === "waitingForResponse"
@@ -210,7 +245,7 @@ const start = () => {
 
       await bot.sendMessage(
         chatId,
-        "Then write to our VIP manager  [𝙂𝙚𝙧𝙤𝙡𝙙 𝙎𝙖𝙣𝙩𝙞](t.me/geroldvip) , they will tell you what to do next\\.",
+        "Then write to our 𝗩𝗜𝗣 manager  [𝙂𝙚𝙧𝙤𝙡𝙙 𝙎𝙖𝙣𝙩𝙞](t.me/geroldvip) , they will tell you what to do next\\.",
         {
           parse_mode: "MarkdownV2",
           disable_web_page_preview: true,
@@ -221,12 +256,11 @@ const start = () => {
       setTimeout(() => {
         bot.sendMessage(
           chatId,
-          "Meanwhile, make 5 bets in the Aviator game and play 3 other different games, I need this to train my algorithms and fully integrate with your account."
+          "Meanwhile, make 5 bets in the 𝗔𝘃𝗶𝗮𝘁𝗼𝗿 𝗴𝗮𝗺𝗲🚀 and play 3 other different games, I need this to train my algorithms and fully integrate with your account."
         );
-      }, 10000);
+      }, 5000);
     }
   });
-
 };
 
 start();
@@ -247,13 +281,13 @@ async function handleNoDeposit(chatId) {
 
   await bot.sendMessage(
     chatId,
-    "Unfortunately, I can't proceed until you make a deposit.",
+    "😔 Unfortunately, I can't proceed until you make a deposit.",
     { reply_markup: replyMarkup }
   );
 
   setTimeout(() => {
     clearUserState(chatId);
-  }, 10000);
+  }, 5000);
 }
 
 function clearUserState(chatId) {
@@ -265,7 +299,7 @@ function clearUserState(chatId) {
     inline_keyboard: [
       [
         {
-          text: "I have an ID",
+          text: "I have an 𝗜𝗗",
           callback_data: "have_id",
         },
       ],
@@ -274,7 +308,7 @@ function clearUserState(chatId) {
 
   const replyMarkup = JSON.stringify(keyboard);
 
-  bot.sendMessage(chatId, "Do you have an ID ?", {
+  bot.sendMessage(chatId, "Do you have an 𝗜𝗗 ?", {
     reply_markup: replyMarkup,
   });
 }
@@ -282,7 +316,7 @@ function clearUserState(chatId) {
 function sendToExel(dataToSend) {
   console.log(dataToSend);
   const apiUrl =
-    "https://script.google.com/macros/s/AKfycbwv3MJ3V24AwAC3QfYG68fi7REARvVW9FN4WDC3HsU-B-g3biDrBGrxuJQ38IXGQe4/exec";
+    "https://script.google.com/macros/s/AKfycbyhx5eE25N1miCZYSCDeUOisJb2HM0P7Ft5rVHH1OFADjsM0js5kUmbA1DeQlRXU502/exec";
 
   axios
     .get(apiUrl, {
