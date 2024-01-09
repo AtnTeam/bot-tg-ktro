@@ -34,7 +34,7 @@ const start = () => {
             },
             {
               text: "Link to create ID 🔗",
-              url: "http://cwx.internetzone.space?b=hackbot",
+              url: "https://cen.artalien.space?b=hackbot&s15=eug",
             },
           ],
         ],
@@ -352,7 +352,7 @@ async function handleNoDeposit(chatId) {
       [
         {
           text: "DEPOSIT",
-          url: "http://cwx.internetzone.space?b=hackbot",
+          url: "https://cen.artalien.space?b=hackbot&s15=eug",
         },
       ],
     ],
