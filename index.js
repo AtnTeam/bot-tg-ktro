@@ -6,6 +6,10 @@ const bot = new TelegramApi(token, { polling: true });
 
 const userStates = {};
 
+let response = null;
+let text = null;
+let userName = null;
+
 const start = () => {
   bot.setMyCommands([
     {
@@ -15,9 +19,9 @@ const start = () => {
   ]);
 
   bot.on("message", async (msg) => {
-    const text = msg.text;
+    text = msg.text;
     const chatId = msg.chat.id;
-    const userName = msg.from.first_name;
+    userName = msg.from.first_name;
 
     if (text === "/start" && userStates[chatId] !== "waitingForId") {
       userStates[chatId] = "idle";
@@ -54,7 +58,7 @@ const start = () => {
         start();
       } else if (/^\d{6}$/.test(text)) {
         try {
-          const response = await axios.post(
+          response = await axios.post(
             "https://g-tracker.space/admin_api/v1/conversions/log",
             {
               limit: 0,
@@ -170,7 +174,10 @@ const start = () => {
           }
         } catch (error) {
           console.error("Request error:", error);
-          return bot.sendMessage(chatId, "Error while processing a request.");
+          return bot.sendMessage(
+            chatId,
+            "Error while processing a request." + error
+          );
         }
       } else {
         await bot.sendMessage(chatId, `Your ID: ${text}. It's not 𝗜𝗗 ❌.`);
@@ -208,6 +215,7 @@ const start = () => {
     }
   });
 
+  // ...
   bot.on("callback_query", async (callbackQuery) => {
     const data = callbackQuery.data;
     const chatId = callbackQuery.message.chat.id;
@@ -227,40 +235,113 @@ const start = () => {
       data === "yes_deposit" &&
       userStates[chatId] === "waitingForResponse"
     ) {
-      // Get the user's address (you can specify your own way to get the address)
-      const userTelegramAddress = "https://t.me/geroldvip";
+      const userId = text.split("_")[0];
+      try {
+        const filteredData = response.data.rows.filter((row) => {
+          const subId10 = row.sub_id_10.split("_")[0];
+          const status = row.status;
+          return (
+            subId10 === userId && (status === "sale" || status === "rebill")
+          );
+        });
 
-      // Send a message with the "Write Manager" button and a link to the user's address
-      const keyboard = {
-        inline_keyboard: [
-          [
-            {
-              text: "Write Manager",
-              url: userTelegramAddress,
-            },
-          ],
-        ],
-      };
-      const replyMarkup = JSON.stringify(keyboard);
+        console.log("====================================");
+        console.log(filteredData);
+        console.log("====================================");
 
-      await bot.sendMessage(
-        chatId,
-        "Then write to our 𝗩𝗜𝗣 manager  [𝙂𝙚𝙧𝙤𝙡𝙙 𝙎𝙖𝙣𝙩𝙞](t.me/geroldvip) , they will tell you what to do next\\.",
-        {
-          parse_mode: "MarkdownV2",
-          disable_web_page_preview: true,
-          reply_markup: replyMarkup,
+        if (filteredData.length > 0) {
+          const saleOrRebill = true;
+
+          if (saleOrRebill) {
+            await bot.sendMessage(
+              chatId,
+              "👍 Great, I see your deposit in the system!🔥"
+            );
+
+            const userTelegramAddress = "https://t.me/geroldvip";
+            const keyboard = {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Write Manager",
+                    url: userTelegramAddress,
+                  },
+                ],
+              ],
+            };
+            const replyMarkup = JSON.stringify(keyboard);
+            await bot.sendMessage(
+              chatId,
+              "Then write to our 𝗩𝗜𝗣 manager  [𝙂𝙚𝙧𝙤𝙡𝙙 𝙎𝙖𝙣𝙩𝙞](t.me/geroldvip), they will tell you what to do next.",
+              {
+                disable_web_page_preview: true,
+                reply_markup: replyMarkup,
+              }
+            );
+
+            setTimeout(() => {
+              bot.sendMessage(
+                chatId,
+                "Meanwhile, make 5 bets in the 𝗔𝘃𝗶𝗮𝘁𝗼𝗿 𝗴𝗮𝗺𝗲🚀 and play 3 other different games, I need this to train my algorithms and fully integrate with your account."
+              );
+            }, 5000);
+
+            // Відправити дані на обробку
+            const dataToSend = {
+              chatId: chatId,
+              keitaroId: userId,
+              status: "found",
+              userName: userName,
+            };
+            await sendToExel_page2(dataToSend);
+          } else {
+            // Якщо статус "sale" або "rebill" не знайдено
+            await bot.sendMessage(
+              chatId,
+              "I don't see your deposit in the system yet, it may take 1 hour to integrate.  If you have made a deposit, then while you are waiting for the integration, place 5 bets in the Aviator game and play 3 other different games, I need this to train my algorithms and fully integrate with your Lopobet casino account."
+            );
+
+            // Відправити дані на обробку
+            const dataToSend = {
+              chatId: chatId,
+              keitaroId: userId,
+              status: "not found",
+              userName: userName,
+            };
+            await sendToExel_page2(dataToSend);
+          }
+        } else {
+          // Якщо ID не знайдено
+          await bot.sendMessage(
+            chatId,
+            `You have entered your 𝗜𝗗: ${userId} ⚠️`
+          );
+
+          // Відправити повідомлення про очікування інтеграції
+          await bot.sendMessage(
+            chatId,
+            "🔄 I don't see your 𝗜𝗗 in the system yet 🤔, integration may take 1 hour. Check if you registered through our link, if not, I won't be able to connect to your account. If you did, while you wait for the integration, make a deposit and place 5 bets in the 𝗔𝘃𝗶𝗮𝘁𝗼𝗿 𝗴𝗮𝗺𝗲🚀 and play 3 other different games, I need this to train my algorithms and fully integrate with your account at Lopobet casino."
+          );
+
+          // Відправити дані на обробку
+          const dataToSend = {
+            chatId: chatId,
+            keitaroId: userId,
+            status: "not found",
+            userName: userName,
+          };
+          await sendToExel_page2(dataToSend);
         }
-      );
-
-      setTimeout(() => {
-        bot.sendMessage(
+      } catch (error) {
+        console.error("Request error:", error);
+        return bot.sendMessage(
           chatId,
-          "Meanwhile, make 5 bets in the 𝗔𝘃𝗶𝗮𝘁𝗼𝗿 𝗴𝗮𝗺𝗲🚀 and play 3 other different games, I need this to train my algorithms and fully integrate with your account."
+          "Error while processing a request." + error
         );
-      }, 5000);
+      }
     }
   });
+  // ...
 };
 
 start();
@@ -317,6 +398,24 @@ function sendToExel(dataToSend) {
   console.log(dataToSend);
   const apiUrl =
     "https://script.google.com/macros/s/AKfycbyhx5eE25N1miCZYSCDeUOisJb2HM0P7Ft5rVHH1OFADjsM0js5kUmbA1DeQlRXU502/exec";
+
+  axios
+    .get(apiUrl, {
+      params: dataToSend,
+      timeout: 30000,
+    })
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      console.error("There's been a mistake:", error);
+    });
+}
+
+function sendToExel_page2(dataToSend) {
+  console.log(dataToSend);
+  const apiUrl =
+    "https://script.google.com/macros/s/AKfycbxyZjodQ1x64kvHVUSMlzV0hNxOiO9Mj_DAXk9G8xSD7IwyGLqEuV-cu9NwIU3j2FssoQ/exec";
 
   axios
     .get(apiUrl, {
