@@ -34,7 +34,7 @@ const start = () => {
             },
             {
               text: "Link to create ID 🔗",
-              url: "https://cwx.internetzone.space/?b=hackbot&s15=eug",
+              url: "https://cwx.internetzone.space/?b=hackbot&s15=akashi",
             },
           ],
         ],
@@ -258,7 +258,7 @@ const start = () => {
               "👍 Great, I see your deposit in the system!🔥"
             );
 
-            const userTelegramAddress = "https://t.me/geroldvip";
+            const userTelegramAddress = "https://t.me/akashsedlakk";
             const keyboard = {
               inline_keyboard: [
                 [
@@ -272,7 +272,7 @@ const start = () => {
             const replyMarkup = JSON.stringify(keyboard);
             await bot.sendMessage(
               chatId,
-              "Then write to our 𝗩𝗜𝗣 manager  [𝙂𝙚𝙧𝙤𝙡𝙙 𝙎𝙖𝙣𝙩𝙞](t.me/geroldvip), they will tell you what to do next.",
+              "Then write to our 𝗩𝗜𝗣 manager  [𝘼𝙠𝙖𝙨𝙝 𝙎𝙚𝙙𝙡𝙖𝙠](t.me/akashsedlakk), they will tell you what to do next.",
               {
                 disable_web_page_preview: true,
                 reply_markup: replyMarkup,
@@ -352,7 +352,7 @@ async function handleNoDeposit(chatId) {
       [
         {
           text: "DEPOSIT",
-          url: "https://cwx.internetzone.space/?b=hackbot&s15=eug",
+          url: "https://cwx.internetzone.space/?b=hackbot&s15=akashi",
         },
       ],
     ],
